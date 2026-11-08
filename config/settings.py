@@ -138,3 +138,7 @@ REQUIRE_USER_MFA = env_bool("REQUIRE_USER_MFA", False)
 
 # WhatsApp number that receives approval requests (digits only, with country code, e.g. 923001234567).
 ADMIN_WHATSAPP = "".join(ch for ch in os.environ.get("ADMIN_WHATSAPP", "") if ch.isdigit())
+
+# Rate limits and login lockouts live in the database so every worker and every restart shares the same counters.
+# (The cache table is created automatically after "migrate"; see core/apps.py.)
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.db.DatabaseCache", "LOCATION": "dg_cache"}}

@@ -318,3 +318,43 @@ class PdfAndSeedTests(TestCase):
         for plat in ("nginx", "apache", "django", "express", "static", "bogus"):
             pdf = build_pdf(scan, plat)
             self.assertTrue(pdf.startswith(b"%PDF") and len(pdf) > 3000)
+
+
+class DnsRebindingTests(TestCase):
+    """The IPs that passed validation are the only ones the HTTP client may connect to."""
+
+    def test_lookup_is_pinned_to_validated_ips_even_if_dns_changes(self):
+        import socket
+        from scans import security
+        answers = iter([[(2, 1, 6, "", ("93.184.216.34", 443))], [(2, 1, 6, "", ("127.0.0.1", 443))]])
+        calls = []
+
+        def fake_real(host, port, *a, **k):
+            calls.append(host)
+            if host == "evil.example":
+                return next(answers)  # first lookup: public, any later lookup of the name: loopback
+            return [(2, 1, 6, "", (host, port))]
+
+        with mock.patch.object(security, "_real_getaddrinfo", fake_real):
+            with security.pinned_target("https://evil.example/"):
+                got = socket.getaddrinfo("evil.example", 443)
+                again = socket.getaddrinfo("evil.example", 443)
+        self.assertEqual({g[4][0] for g in got + again}, {"93.184.216.34"})
+        self.assertEqual(calls.count("evil.example"), 1)  # resolved once, never again
+        # outside the block the pin is gone
+        self.assertNotIn("evil.example", getattr(security._pins, "map", {}))
+
+    def test_private_resolution_is_still_refused(self):
+        from scans import security
+        with mock.patch.object(security, "_real_getaddrinfo", lambda *a, **k: [(2, 1, 6, "", ("10.0.0.5", 443))]):
+            with self.assertRaises(UnsafeTarget):
+                security.validate_target("https://internal.example/")
+
+
+class SharedCacheTests(TestCase):
+    def test_rate_limit_counters_use_the_database_cache(self):
+        from django.conf import settings
+        self.assertTrue(settings.CACHES["default"]["BACKEND"].endswith("DatabaseCache"))
+        cache.clear()
+        cache.set("k", 3, 60)
+        self.assertEqual(cache.get("k"), 3)

@@ -8,7 +8,7 @@ import requests
 from django.conf import settings
 
 from .checks import CHECKS, CheckResult
-from .security import UnsafeTarget, safe_request
+from .security import UnsafeTarget, pinned_target, safe_request
 
 SESSION_NAME = re.compile(r"(sess|sid|auth|token|jwt|login)", re.I)
 VERSIONED = re.compile(r"\d+\.\d+")
@@ -139,9 +139,11 @@ def _check_tls(url):
     except (ssl.SSLError, ValueError, AttributeError):
         return _skip("tls", "this server's TLS library cannot offer TLS 1.0 or 1.1")
     try:
-        with socket.create_connection((parts.hostname, parts.port or 443), timeout=settings.SCAN_TIMEOUT_SECONDS) as raw:
+        with pinned_target(url), socket.create_connection((parts.hostname, parts.port or 443), timeout=settings.SCAN_TIMEOUT_SECONDS) as raw:
             with ctx.wrap_socket(raw, server_hostname=parts.hostname) as tls:
                 return _fail("tls", f"Handshake {tls.version()} -> accepted")
+    except UnsafeTarget:
+        return _skip("tls", "the address is not allowed to be scanned")
     except ssl.SSLError:
         return _pass("tls", "TLS 1.0 and 1.1 handshakes were rejected.")
     except OSError:

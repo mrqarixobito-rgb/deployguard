@@ -46,6 +46,11 @@ scan the QR code, enter the 6-digit code and save the 8 one-time recovery codes.
 
 The logo in every page links to the public Home page (`/`).
 
+## Security notes
+
+- Scanner requests are pinned to the IP addresses that passed the public-address check, so DNS rebinding cannot redirect a scan to an internal address.
+- Rate limits and login lockouts are kept in the database (cache table `dg_cache`, created by `migrate`), so they are shared by all workers and survive restarts.
+
 ## Where the data is stored
 
 Everything is in one SQLite file, `db.sqlite3` (change the location with `DATABASE_PATH` in `.env`).
