@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Database · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_database.css' %}">{% endblock %}
+{% block content %}
+<div class="page-h"><div><h1>Database</h1><p class="mute">Read-only view of every table the app stores. Password hashes and secrets are masked.</p></div></div>
+<div class="panel mb-3"><b>Stored in:</b> <span class="mono db-path">{{ db_path }}</span> <span class="mute">(SQLite file on the server)</span></div>
+<div class="table-picker mb-3">{% for name, n in table_names %}<a class="dgbtn is-sm {% if name == current %}is-primary{% endif %}" href="?table={{ name }}">{{ name }} <span class="mono">{{ n }}</span></a>{% endfor %}</div>
+<div class="panel flat"><div class="tbl-wrap"><table class="dgtable db-grid" style="min-width:{{ cols|length }}00px"><thead><tr>{% for c in cols %}<th>{{ c }}</th>{% endfor %}</tr></thead><tbody>
+{% for row in rows %}<tr>{% for v in row %}<td title="{{ v }}">{{ v }}</td>{% endfor %}</tr>{% empty %}<tr><td colspan="{{ cols|length }}" class="empty">This table is empty.</td></tr>{% endfor %}
+</tbody></table></div></div>
+<p class="hint">Showing up to 200 rows per table.</p>
+{% endblock %}

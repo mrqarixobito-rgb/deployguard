@@ -1,0 +1,44 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Request access to DeployGuard AI{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/register.css' %}">{% endblock %}
+{% block shell %}
+<div class="auth">
+  <section class="auth-form" aria-labelledby="t">
+    <a class="brand" href="{% url 'home' %}" aria-label="Back to home">{% include "partials/_logo.html" %}{{ SITE_NAME }}</a>
+    <div class="stack" style="gap:10px"><h1 id="t">Request access</h1>
+      <p class="mute">An administrator reviews every account before it can run scans.</p></div>
+    <div class="auth-tabs"><a href="{% url 'accounts:login' %}">Sign in</a><a href="{% url 'accounts:register' %}" aria-current="page">Request access</a></div>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-12 col-md-6"><label class="form-label" for="id_username">Username</label>
+          <input class="form-control" id="id_username" name="username" value="{{ form.username.value|default:'' }}" autocomplete="username" required>
+          {% for e in form.username.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>
+        <div class="col-12 col-md-6"><label class="form-label" for="id_email">Work email</label>
+          <input class="form-control" id="id_email" name="email" type="email" value="{{ form.email.value|default:'' }}" autocomplete="email" required>
+          {% for e in form.email.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>
+        <div class="col-12"><label class="form-label" for="id_organization">Project or organization</label>
+          <input class="form-control" id="id_organization" name="organization" value="{{ form.organization.value|default:'' }}" placeholder="Northwind Labs">
+          {% for e in form.organization.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>
+        <div class="col-12 col-md-6"><label class="form-label" for="id_password">Password</label>
+          <input class="form-control" id="id_password" name="password" type="password" autocomplete="new-password" required>
+          {% for e in form.password.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>
+        <div class="col-12 col-md-6"><label class="form-label" for="id_password2">Repeat password</label>
+          <input class="form-control" id="id_password2" name="password2" type="password" autocomplete="new-password" required>
+          {% for e in form.password2.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>
+        <div class="col-12"><button class="dgbtn is-primary w-100" type="submit">Send request</button></div>
+      </div>
+    </form>
+  </section>
+  <aside class="auth-art" aria-label="What happens next">
+    <h2>What happens next</h2>
+    <ol class="steps">
+      <li><div><b>An admin reviews your request</b><span class="mute">You cannot sign in until the request is approved.</span></div></li>
+      <li><div><b>Scan a website you own</b><span class="mute">Enter an address and get a score, evidence and a fix guide for each finding.</span></div></li>
+      <li><div><b>Fix, deploy, re-scan</b><span class="mute">The new scan is compared with the old one so you can see what is resolved, new or recurring.</span></div></li>
+    </ol>
+    <div class="reg-note"><b>Only test sites you own.</b><p class="mute">Scans send ordinary web requests and read the response headers. You will confirm permission each time you scan.</p></div>
+  </aside>
+</div>
+{% endblock %}

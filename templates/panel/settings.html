@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}AI settings · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_settings.css' %}">{% endblock %}
+{% block content %}
+<div class="page-h"><div><h1>AI settings</h1><p class="mute">Only the admin can see or change the Gemini key. It is saved encrypted in the database and used for every user's AI explanations.</p></div></div>
+<div class="panel settings-card stack">
+  <div class="key-state"><b>Gemini API key:</b>
+    {% if has_key %}<span class="chip c-approved">saved</span><span class="key-hint mute">{{ key_hint }}</span>{% else %}<span class="chip c-pending">not set</span>{% endif %}
+    {% if updated %}<span class="mute mono">updated {{ updated.updated_at|date:"j M Y, H:i" }}</span>{% endif %}</div>
+  <form method="post" class="stack">{% csrf_token %}<input type="hidden" name="action" value="save">
+    <div><label class="form-label" for="api_key">{% if has_key %}Replace API key{% else %}API key{% endif %}</label><input class="form-control" id="api_key" name="api_key" type="password" autocomplete="off" placeholder="AIza…">
+      <p class="hint">Create a free key at aistudio.google.com/apikey. Leave this empty to keep the current key.</p></div>
+    <div><label class="form-label" for="model">Model</label><select class="form-select" id="model" name="model">{% for m in models %}<option value="{{ m }}" {% if m == model %}selected{% endif %}>{{ m }}</option>{% endfor %}</select></div>
+    <div class="hrow"><button class="dgbtn is-primary" type="submit">Save settings</button></div>
+  </form>
+  <div class="hrow">
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="test"><button class="dgbtn" type="submit" {% if not has_key %}disabled{% endif %}>Test key</button></form>
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="clear"><button class="dgbtn is-bad" type="submit" {% if not has_key %}disabled{% endif %}>Remove key</button></form>
+  </div>
+  <p class="hint">Without a key, users see a sample explanation built from the scanner's evidence. Every prompt and answer is logged under AI prompts.</p>
+</div>
+{% endblock %}

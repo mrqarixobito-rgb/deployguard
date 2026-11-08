@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Website links · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_links.css' %}">{% endblock %}
+{% block content %}
+<div class="page-h"><div><h1>Website links</h1><p class="mute">Every address users have submitted for scanning.</p></div>
+  <form class="search-box" method="get"><label class="form-label mute" for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Address or user"></form></div>
+<div class="panel flat"><div class="tbl-wrap"><table class="dgtable"><thead><tr><th>Website</th><th>Submitted by</th><th>Scans</th><th>Score</th><th>Open findings</th><th>Last scan</th></tr></thead><tbody>
+{% for r in rows %}<tr><td class="url-cell"><a class="mono" href="{{ r.site.url }}" target="_blank" rel="noopener noreferrer">{{ r.site.url }}</a></td>
+  <td><a href="{% url 'panel:user' r.site.owner.pk %}">{{ r.site.owner.username }}</a></td><td class="num">{{ r.count }}</td><td class="num c-{{ r.latest.score_class }}"><b>{{ r.latest.score }}</b></td><td class="num">{{ r.open }}</td><td class="mute">{{ r.latest.created_at|timesince }} ago</td></tr>
+{% empty %}<tr><td colspan="6" class="empty">No websites match.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

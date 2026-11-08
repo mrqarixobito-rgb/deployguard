@@ -1,0 +1,78 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}{{ SITE_NAME }}: see what each deploy changes in your site's security{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">{% endblock %}
+{% block body_class %}home{% endblock %}
+{% block content %}
+<div class="wrap">
+  <section class="hero" aria-labelledby="hero-t">
+    <div>
+      <h1 id="hero-t">Did your last deploy make your site <em>safer or weaker?</em></h1>
+      <p class="lead">DeployGuard AI scans your website, compares the result with the previous scan, explains each finding with AI and shows exactly how to fix it. Then it re-tests to prove the fix worked.</p>
+      <div class="cta">
+        {% if user.is_authenticated %}
+          <a class="dgbtn is-primary" href="{% if user.is_superuser %}{% url 'panel:overview' %}{% else %}{% url 'scans:dashboard' %}{% endif %}">{% if user.is_superuser %}Open admin panel{% else %}Open dashboard{% endif %}<svg class="ic"><use href="#i-arrow"/></svg></a>
+        {% else %}
+          <a class="dgbtn is-primary" href="{% url 'accounts:register' %}">Request access<svg class="ic"><use href="#i-arrow"/></svg></a>
+          <a class="dgbtn" href="{% url 'accounts:login' %}">Sign in</a>
+        {% endif %}
+      </div>
+      <div class="trust">
+        <span><svg class="ic"><use href="#i-check"/></svg>11 repeatable checks</span>
+        <span><svg class="ic"><use href="#i-check"/></svg>Fix code for 5 server types</span>
+        <span><svg class="ic"><use href="#i-check"/></svg>PDF reports with your branding</span>
+        <span><svg class="ic"><use href="#i-check"/></svg>MFA sign-in</span>
+      </div>
+    </div>
+    <div class="diffcard" role="figure" aria-label="Example comparison of two scans">
+      <div class="diffcard-h"><b>northwind.dev</b><span class="mono mute">scan 4 vs scan 3</span></div>
+      <div class="diffcard-score"><div class="ring med" style="--p:74"><i>74</i></div>
+        <div><div class="delta">+12 since last scan</div><p class="mute">2 fixed, 1 new, 1 came back.</p></div></div>
+      <div class="row-f"><span class="chip c-new">new</span><span>Content-Security-Policy missing</span><span class="chip c-high">high</span></div>
+      <div class="row-f"><span class="chip c-recurring">recurring</span><span>Session cookie lacks HttpOnly</span><span class="chip c-critical">critical</span></div>
+      <div class="row-f"><span class="chip c-unchanged">unchanged</span><span>Server version disclosed</span><span class="chip c-low">low</span></div>
+      <div class="row-f"><span class="chip c-resolved">resolved</span><span>HSTS header added</span><span class="chip c-high">high</span></div>
+      <div class="row-f"><span class="chip c-resolved">resolved</span><span>Clickjacking protection added</span><span class="chip c-medium">medium</span></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="how-t">
+    <h2 id="how-t">Detect, compare, explain, fix, re-test</h2>
+    <p class="sub">One loop that repeats after every deploy, so a fix that quietly breaks later does not go unnoticed.</p>
+    <ol class="flow5 p-0">
+      <li><b>Detect</b><span>Fixed checks read your headers, cookies, redirects, CORS and TLS.</span></li>
+      <li><b>Compare</b><span>Each finding is marked new, unchanged, resolved or recurring.</span></li>
+      <li><b>Explain</b><span>AI describes the impact from the scanner's own evidence.</span></li>
+      <li><b>Fix</b><span>Copy ready code for Nginx, Apache, Django, Express or Netlify and Vercel.</span></li>
+      <li><b>Re-test</b><span>Scan again and watch the finding move to Resolved.</span></li>
+    </ol>
+  </section>
+
+  <section class="sec" aria-labelledby="feat-t">
+    <h2 id="feat-t">Built for teams that ship often</h2>
+    <div class="feat">
+      <article><div class="ico"><svg class="ic"><use href="#i-layers"/></svg></div><h3>Old vs new results</h3><p>A table of every scan of a site shows which checks passed, failed and returned.</p></article>
+      <article><div class="ico"><svg class="ic"><use href="#i-cpu"/></svg></div><h3>AI that stays grounded</h3><p>The scanner decides what is wrong. The AI only explains the evidence, so results are repeatable.</p></article>
+      <article><div class="ico"><svg class="ic"><use href="#i-file"/></svg></div><h3>PDF reports</h3><p>Download a report with the logo, a watermark, the scan history and fix steps on every page.</p></article>
+      <article><div class="ico"><svg class="ic"><use href="#i-lock"/></svg></div><h3>MFA and approvals</h3><p>Sign in with an authenticator app. An admin approves every new account.</p></article>
+      <article><div class="ico"><svg class="ic"><use href="#i-database"/></svg></div><h3>Your data, one database</h3><p>Scans, prompts and settings are stored in SQLite. The admin can browse every table.</p></article>
+      <article><div class="ico"><svg class="ic"><use href="#i-key"/></svg></div><h3>Key kept on the server</h3><p>The Gemini key is encrypted in the database and never sent to a browser.</p></article>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="chk-t">
+    <h2 id="chk-t">What every scan checks</h2>
+    <div class="checks-grid">
+      {% for c in checks %}<div class="ck"><span>{{ c.title }}</span><span class="chip c-{{ c.severity }}">{{ c.severity }}</span></div>{% endfor %}
+    </div>
+  </section>
+
+  <section class="cta-band" aria-labelledby="cta-t">
+    <h2 id="cta-t">Run your first scan in a minute</h2>
+    <p class="mute mt-2">Only scan websites you own or have permission to test.</p>
+    <div class="cta">
+      {% if user.is_authenticated %}<a class="dgbtn is-primary" href="{% if user.is_superuser %}{% url 'panel:overview' %}{% else %}{% url 'scans:dashboard' %}{% endif %}">Go to your workspace</a>
+      {% else %}<a class="dgbtn is-primary" href="{% url 'accounts:register' %}">Request access</a><a class="dgbtn" href="{% url 'accounts:login' %}">Sign in</a>{% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

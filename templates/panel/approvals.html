@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Approvals · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_approvals.css' %}">{% endblock %}
+{% block content %}
+<div class="page-h"><div><h1>Approvals</h1><p class="mute">New accounts cannot sign in or scan until you approve them.</p></div></div>
+<div class="panel flat mb-4"><div class="panel-h"><h3>Pending ({{ pending|length }})</h3></div>
+  {% for u in pending %}{% include "partials/_userline.html" %}{% empty %}<div class="empty">Nothing waiting. New requests appear here.</div>{% endfor %}</div>
+<div class="panel flat"><div class="panel-h"><h3>Decided</h3></div>
+  <div class="tbl-wrap"><table class="dgtable"><thead><tr><th>User</th><th>Status</th><th></th></tr></thead><tbody>
+  {% for u in decided %}<tr><td><a href="{% url 'panel:user' u.pk %}"><b>{{ u.username }}</b></a><div class="mute mono">{{ u.email }}</div></td><td><span class="chip c-{{ u.profile.status }}">{{ u.profile.status }}</span></td>
+    <td class="decided-actions"><form method="post" action="{% url 'panel:status' u.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+      {% if u.profile.status == "approved" %}<input type="hidden" name="status" value="rejected"><button class="dgbtn is-sm is-bad" type="submit">Revoke</button>
+      {% else %}<input type="hidden" name="status" value="approved"><button class="dgbtn is-sm is-ok" type="submit">Approve</button>{% endif %}</form></td></tr>
+  {% empty %}<tr><td colspan="3" class="empty">No decided accounts yet.</td></tr>{% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

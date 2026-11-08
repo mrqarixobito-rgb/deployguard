@@ -1,0 +1,37 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Sign in to DeployGuard AI{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/login.css' %}">{% endblock %}
+{% block shell %}
+<div class="auth">
+  <section class="auth-form" aria-labelledby="t">
+    <a class="brand" href="{% url 'home' %}" aria-label="Back to home">{% include "partials/_logo.html" %}{{ SITE_NAME }}</a>
+    <div class="stack" style="gap:10px"><h1 id="t">Did your last deploy make the site safer?</h1>
+      <p class="mute">Sign in to compare today's scan with the last one and confirm your fixes.</p></div>
+    <div class="auth-tabs"><a href="{% url 'accounts:login' %}" aria-current="page">Sign in</a><a href="{% url 'accounts:register' %}">Request access</a></div>
+    {% include "partials/_messages.html" %}
+    {% if wa_link %}<a class="wa-btn" href="{{ wa_link }}" target="_blank" rel="noopener noreferrer"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.4 14.2c-.2.6-1.300 1.200-1.800 1.200-.5.1-1 .2-3.300-.7-2.800-1.100-4.600-4-4.700-4.200-.1-.2-1.100-1.500-1.100-2.900s.7-2 1-2.300c.2-.3.500-.3.700-.3h.5c.2 0 .4 0 .6.500l.8 2c.1.200.1.300 0 .5l-.4.600c-.1.200-.3.300-.1.600.2.300.8 1.300 1.700 2.100 1.100 1 2 1.300 2.300 1.400.3.100.4.100.6-.1l.8-1c.2-.3.400-.2.600-.1l1.900.9c.3.100.5.200.5.300.1.200.1.800-.1 1.400Z"/></svg>Request approval on WhatsApp</a>{% endif %}
+    <form method="post" class="stack" novalidate>
+      {% csrf_token %}
+      <div><label class="form-label" for="username">Username</label><input class="form-control" id="username" name="username" autocomplete="username" required autofocus placeholder="your username"></div>
+      <div><label class="form-label" for="password">Password</label><input class="form-control" id="password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+      {% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}
+      <button class="dgbtn is-primary" type="submit">Sign in</button>
+    </form>
+    {% if DEBUG %}<p class="hint">Local demo (after <span class="mono">python manage.py seed_demo</span>): <span class="mono">demo.dev</span> / <span class="mono">Demo@1234</span></p>{% endif %}
+    <button class="dgbtn is-sm is-ghost" type="button" data-theme-toggle style="align-self:flex-start">Theme: auto</button>
+  </section>
+  <aside class="auth-art" aria-label="Example scan comparison">
+    <div><h2>One workflow, five steps</h2><div class="flow mt-2"><b>Detect</b> → <b>Compare</b> → <b>Explain</b> → <b>Fix</b> → <b>Re-test</b></div></div>
+    <div class="ledger" role="table" aria-label="Sample findings">
+      <div class="ledger-h"><b>northwind.dev: scan 4 vs scan 3</b><span class="mono mute">score 62 → 74</span></div>
+      <div class="lg-row" role="row"><span class="chip c-new">new</span><span>Content-Security-Policy missing</span><span class="chip c-high">high</span></div>
+      <div class="lg-row" role="row"><span class="chip c-recurring">recurring</span><span>Session cookie lacks HttpOnly</span><span class="chip c-critical">critical</span></div>
+      <div class="lg-row" role="row"><span class="chip c-unchanged">unchanged</span><span>Server version disclosed</span><span class="chip c-low">low</span></div>
+      <div class="lg-row" role="row"><span class="chip c-resolved">resolved</span><span>HSTS header added</span><span class="chip c-high">high</span></div>
+      <div class="lg-row" role="row"><span class="chip c-resolved">resolved</span><span>Clickjacking protection added</span><span class="chip c-medium">medium</span></div>
+    </div>
+    <p class="mute" style="max-width:56ch">Findings come from fixed, repeatable checks. The AI only explains what the scanner measured, so the same site always produces the same findings.</p>
+  </aside>
+</div>
+{% endblock %}

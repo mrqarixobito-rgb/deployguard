@@ -1,0 +1,6 @@
+/* Admin overview: decision queue and latest AI prompts side by side. */
+.queue-item{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
+.queue-item:last-child{border-bottom:0}
+.prompt-line{padding:12px 20px;border-bottom:1px solid var(--line)}
+.prompt-line:last-child{border-bottom:0}
+.ai-status{display:flex;gap:10px;align-items:center;flex-wrap:wrap}

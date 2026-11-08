@@ -1,0 +1,8 @@
+/* Shared by the sign-in and request-access pages: split screen, form on the left, art panel on the right. */
+.auth{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)))}
+.auth-form{padding:48px max(24px,5vw);display:flex;flex-direction:column;justify-content:center;gap:26px;max-width:560px;width:100%;margin:0 auto}
+.auth-art{background:var(--bg2);border-left:1px solid var(--line);padding:48px max(24px,4vw);display:flex;flex-direction:column;justify-content:center;gap:20px;min-width:0}
+.auth-tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--line);padding:4px;border-radius:var(--r-md)}
+.auth-tabs a{flex:1;text-align:center;padding:8px;border-radius:var(--r-sm);font-weight:600;color:var(--mute);text-decoration:none}
+.auth-tabs a[aria-current="page"]{background:var(--bg3);color:var(--fg)}
+@media (max-width:860px){.auth{grid-template-columns:1fr}.auth-art{border-left:0;border-top:1px solid var(--line)}}

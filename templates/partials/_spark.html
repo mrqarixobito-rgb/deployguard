@@ -1,0 +1,1 @@
+{% if spark %}<svg class="sparkline" width="{{ spark.w }}" height="{{ spark.h }}" role="img" aria-label="Score trend"><polyline points="{{ spark.points }}"/><circle cx="{{ spark.x }}" cy="{{ spark.y }}" r="3.5"/></svg>{% else %}<span class="mute mono">1 scan</span>{% endif %}

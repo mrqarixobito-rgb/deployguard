@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}AI prompts · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_prompts.css' %}">{% endblock %}
+{% block content %}
+<div class="page-h"><div><h1>AI prompts</h1><p class="mute">Every request sent to the AI model, with the answer it returned.</p></div>
+  <form class="search-box" method="get"><label class="form-label mute" for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="User, site or finding"></form></div>
+<div class="stack">{% for p in prompts %}{% include "partials/_prompt.html" with show_user=True %}{% empty %}<div class="panel empty">No prompts match.</div>{% endfor %}</div>
+{% endblock %}

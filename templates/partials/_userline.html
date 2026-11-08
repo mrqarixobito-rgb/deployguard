@@ -1,0 +1,6 @@
+<div class="queue-item"><div style="min-width:0"><a href="{% url 'panel:user' u.pk %}"><b>{{ u.username }}</b></a> <span class="mute">{{ u.profile.organization }}</span>
+  <div class="mute mono" style="overflow-wrap:anywhere">{{ u.email }} · requested {{ u.date_joined|timesince }} ago</div></div>
+  <div class="hrow" style="gap:8px">
+    <form method="post" action="{% url 'panel:status' u.pk %}">{% csrf_token %}<input type="hidden" name="status" value="approved"><input type="hidden" name="next" value="{{ request.path }}"><button class="dgbtn is-sm is-ok" type="submit">Approve</button></form>
+    <form method="post" action="{% url 'panel:status' u.pk %}">{% csrf_token %}<input type="hidden" name="status" value="rejected"><input type="hidden" name="next" value="{{ request.path }}"><button class="dgbtn is-sm is-bad" type="submit">Reject</button></form>
+  </div></div>

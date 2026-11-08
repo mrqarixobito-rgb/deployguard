@@ -1,0 +1,73 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Dashboard · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/dashboard.css' %}">{% endblock %}
+{% block content %}
+<div class="page-h"><div><h1>Dashboard</h1><p class="mute">Latest result for each website you scan.</p></div></div>
+
+{% if not user.profile.mfa_enabled %}<div class="banner mb-4"><span><svg class="ic"><use href="#i-lock"/></svg> Turn on multi-factor authentication to protect your account.</span><a class="dgbtn is-sm" href="{% url 'accounts:security' %}">Set up MFA</a></div>{% endif %}
+
+{% if sites %}
+<div class="row g-3 mb-4">
+  <div class="col-12 col-lg-5"><div class="panel h-100 posture">
+    <div class="section-title"><svg class="ic"><use href="#i-shield"/></svg><h3>Security posture</h3></div>
+    <div class="hrow" style="gap:22px;align-items:center">
+      <div class="ring {{ posture.class }}" style="--p:{{ posture.avg }}"><i class="num">{{ posture.avg }}</i></div>
+      <div class="grow stack" style="gap:10px"><p class="mute">Average score across {{ stats.sites }} website{{ stats.sites|pluralize }}.</p>
+        <div class="sevbar" role="img" aria-label="Open findings by severity">{% for name, n, pct in posture.sev %}{% if n %}<i class="s-{{ name }}" style="width:{{ pct }}%" title="{{ n }} {{ name }}"></i>{% endif %}{% endfor %}</div>
+        <div class="legend">{% for name, n, pct in posture.sev %}<span class="l-{{ name }}"><b>{{ n }}</b> {{ name }}</span>{% endfor %}</div></div>
+    </div></div></div>
+  <div class="col-12 col-lg-7"><div class="panel flat h-100">
+    <div class="panel-h"><div class="section-title mb-0"><svg class="ic"><use href="#i-search"/></svg><h3>Needs attention</h3></div><span class="mute">recurring issues first</span></div>
+    {% for f in attention %}<a class="attention-item" href="{% url 'scans:detail' f.scan_id %}?open={{ f.pk }}#f{{ f.pk }}"><span class="sev s-{{ f.severity }}"></span>
+      <span style="min-width:0"><b>{{ f.title }}</b><div class="mute mono" style="overflow:hidden;text-overflow:ellipsis">{{ f.scan.website.host }}</div></span>
+      <span class="hrow" style="gap:6px"><span class="chip c-{{ f.status }}">{{ f.status }}</span><span class="chip c-{{ f.severity }}">{{ f.severity }}</span></span></a>
+    {% empty %}<div class="empty">Nothing open. Every check passed in your latest scans.</div>{% endfor %}
+  </div></div>
+</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-lg"><div class="stat"><b class="num">{{ stats.sites }}</b><span>Websites tracked</span></div></div>
+  <div class="col-6 col-md-4 col-lg"><div class="stat"><b class="num">{{ stats.scans }}</b><span>Scans run</span></div></div>
+  <div class="col-6 col-md-4 col-lg"><div class="stat {% if stats.open %}alert{% endif %}"><b class="num">{{ stats.open }}</b><span>Open findings</span></div></div>
+  <div class="col-6 col-md-4 col-lg"><div class="stat {% if stats.recurring %}alert{% endif %}"><b class="num">{{ stats.recurring }}</b><span>Recurring issues</span></div></div>
+  <div class="col-12 col-md-4 col-lg"><div class="stat"><b class="num">{{ stats.fixed }}</b><span>Fixes verified</span></div></div>
+</div>
+
+<div class="panel scan-form mb-4">
+  <h3>Scan a website</h3>
+  <form method="post" action="{% url 'scans:new' %}" data-scan-form class="mt-3">
+    {% csrf_token %}
+    <div class="url-row">
+      <div class="grow"><label class="form-label mute" for="url">Website address</label><input class="form-control" id="url" name="url" inputmode="url" placeholder="https://your-site.com" required></div>
+      <button class="dgbtn is-primary" type="submit">Run scan</button>
+    </div>
+    <label class="consent" for="authorized"><input class="form-check-input" type="checkbox" id="authorized" name="authorized" value="1" required>
+      <span>I own this website or have written permission to test it.</span></label>
+  </form>
+  <p class="hint">Scans send ordinary web requests and read the response headers. Run the same address again after you deploy a fix to see what changed.</p>
+</div>
+
+<div class="panel flat">
+  <div class="panel-h"><h3>Your websites</h3></div>
+  {% if sites %}
+  <div class="tbl-wrap"><table class="dgtable"><thead><tr><th>Website</th><th>Latest score</th><th>Trend</th><th>Changes since previous</th><th>Last scan</th><th></th></tr></thead><tbody>
+  {% for s in sites %}
+    <tr class="click">
+      <td><a class="rowlink site-host" href="{% url 'scans:detail' s.latest.pk %}">{{ s.site.host }}</a><div class="mute mono">{{ s.count }} scan{{ s.count|pluralize }}</div></td>
+      <td><span class="num score-cell c-{{ s.latest.score_class }}">{{ s.latest.score }}</span><span class="mute"> / 100</span></td>
+      <td>{% include "partials/_spark.html" with spark=s.spark %}</td>
+      <td><div class="change-chips">
+        {% if s.counts.new %}<span class="chip c-new">{{ s.counts.new }} new</span>{% endif %}
+        {% if s.counts.recurring %}<span class="chip c-recurring">{{ s.counts.recurring }} recurring</span>{% endif %}
+        {% if s.counts.resolved %}<span class="chip c-resolved">{{ s.counts.resolved }} resolved</span>{% endif %}
+        {% if s.counts.unchanged %}<span class="chip c-unchanged">{{ s.counts.unchanged }} unchanged</span>{% endif %}
+      </div></td>
+      <td class="mute">{{ s.latest.created_at|timesince }} ago</td>
+      <td><a class="dgbtn is-sm" href="{% url 'scans:detail' s.latest.pk %}">View</a></td>
+    </tr>
+  {% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty">No websites yet. Enter an address above to run your first scan.</div>{% endif %}
+</div>
+{% endblock %}

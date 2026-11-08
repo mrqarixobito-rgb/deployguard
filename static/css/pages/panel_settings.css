@@ -1,0 +1,4 @@
+/* AI settings: one form for the Gemini key (stored encrypted in the database) and the model. */
+.settings-card{max-width:680px}
+.key-state{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.key-hint{font-family:var(--font-mono)}

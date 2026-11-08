@@ -1,0 +1,75 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Security · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/security.css' %}">{% endblock %}
+{% block content %}
+<div class="page-h"><div><h1>Security</h1><p class="mute">Protect your account with a code from an authenticator app.</p></div></div>
+
+{% if new_codes %}
+<div class="panel mb-4" style="border-color:var(--ok)">
+  <div class="section-title"><svg class="ic"><use href="#i-key"/></svg><h3>Save your recovery codes</h3></div>
+  <p class="mute mb-3">Each code works once if you lose your phone. They are shown only now. Store them in a password manager or print them.</p>
+  <ul class="codes">{% for c in new_codes %}<li>{{ c }}</li>{% endfor %}</ul>
+  <div class="hrow mt-3"><button type="button" class="dgbtn is-sm" data-copy-codes>Copy all codes</button></div>
+</div>
+{% endif %}
+
+<div class="sec-grid">
+  <div class="stack">
+    <div class="panel">
+      <div class="status-row">
+        <div class="status-ico {% if profile.mfa_enabled %}on{% else %}off{% endif %}"><svg class="ic"><use href="#i-{% if profile.mfa_enabled %}shield{% else %}lock{% endif %}"/></svg></div>
+        <div class="grow"><h3>Multi-factor authentication</h3>
+          <p class="mute">{% if profile.mfa_enabled %}On since {{ profile.mfa_enabled_at|date:"j M Y" }}. You enter a 6-digit code every time you sign in.{% else %}Off. Anyone with your password could sign in.{% endif %}</p></div>
+        <span class="chip {% if profile.mfa_enabled %}c-approved{% else %}c-pending{% endif %}">{% if profile.mfa_enabled %}enabled{% else %}not enabled{% endif %}</span>
+      </div>
+      {% if required and not profile.mfa_enabled %}<div class="banner mt-3"><span>Your role requires MFA. Finish the steps below to continue.</span></div>{% endif %}
+    </div>
+
+    {% if not profile.mfa_enabled %}
+      {% if setup %}
+      <div class="panel">
+        <ol class="setup-steps">
+          <li><div><b>Install an authenticator app</b><p class="mute">Google Authenticator, Microsoft Authenticator, Authy, 1Password or any TOTP app.</p></div></li>
+          <li><div><b>Scan this QR code</b><p class="mute mb-2">Or type the key by hand if you cannot scan.</p>
+            <div class="qr" role="img" aria-label="QR code for your authenticator app">{{ qr|safe }}</div>
+            <p class="hint">Manual key (time-based):</p><div class="secret">{{ secret_text }}</div></div></li>
+          <li><div><b>Enter the 6-digit code</b>
+            <form method="post" class="stack mt-2" novalidate>{% csrf_token %}<input type="hidden" name="action" value="confirm">
+              <input class="form-control code-input" style="max-width:260px;font-family:var(--font-mono);font-size:1.4rem;letter-spacing:.3em;text-align:center" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000000" required>
+              <div class="hrow"><button class="dgbtn is-primary" type="submit">Turn on MFA</button></div></form>
+            <form method="post" class="mt-2">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="dgbtn is-sm is-ghost" type="submit">Cancel</button></form></div></li>
+        </ol>
+      </div>
+      {% else %}
+      <div class="panel"><h3>Set up an authenticator app</h3><p class="mute mt-1 mb-3">It takes about a minute. You will scan a QR code, then confirm with one code.</p>
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="start"><button class="dgbtn is-primary" type="submit"><svg class="ic"><use href="#i-lock"/></svg>Set up MFA</button></form></div>
+      {% endif %}
+    {% else %}
+      <div class="panel manage stack">
+        <h3>Manage MFA</h3>
+        <p class="mute">{{ remaining }} recovery code{{ remaining|pluralize }} left.</p>
+        <details><summary>Create new recovery codes</summary>
+          <form method="post" class="stack mt-3" style="max-width:340px" novalidate>{% csrf_token %}<input type="hidden" name="action" value="regenerate">
+            <div><label class="form-label" for="regen-code">Current authenticator code</label><input class="form-control" id="regen-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="12" required></div>
+            <button class="dgbtn" type="submit"><svg class="ic"><use href="#i-refresh"/></svg>Create new codes</button></form></details>
+        {% if not required %}
+        <details><summary>Turn off MFA</summary>
+          <form method="post" class="stack mt-3" style="max-width:340px" novalidate>{% csrf_token %}<input type="hidden" name="action" value="disable">
+            <div><label class="form-label" for="dis-pass">Password</label><input class="form-control" id="dis-pass" name="password" type="password" autocomplete="current-password" required></div>
+            <div><label class="form-label" for="dis-code">Authenticator code</label><input class="form-control" id="dis-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="12" required></div>
+            <button class="dgbtn is-bad" type="submit">Turn off MFA</button></form></details>
+        {% else %}<p class="hint">This account must keep MFA on.</p>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <aside class="panel">
+    <h3>Why use MFA?</h3>
+    <p class="mute mt-2">A stolen or guessed password is not enough to sign in. The code changes every 30 seconds and can be used only once.</p>
+    <hr style="border-color:var(--line)">
+    <h3>Lost your device?</h3>
+    <p class="mute mt-2">Sign in with a recovery code, then create new ones. If you have no codes left, ask the administrator to reset your MFA.</p>
+  </aside>
+</div>
+{% endblock %}
+{% block page_js %}<script src="{% static 'js/security.js' %}"></script>{% endblock %}

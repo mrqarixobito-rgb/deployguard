@@ -1,0 +1,5 @@
+/* AI prompts log: every request sent to the model, with the answer. */
+.search-box{width:min(100%,320px)}
+.prompt-item{border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg2);padding:12px 14px}
+.prompt-item summary{cursor:pointer;font-weight:600}
+.prompt-item pre{white-space:pre-wrap;word-break:break-word;font-family:var(--font-mono);font-size:.8rem;margin:10px 0 0;background:var(--bg);padding:10px;border-radius:var(--r-sm);border:1px solid var(--line);color:var(--fg)}

@@ -1,0 +1,41 @@
+{% url 'home' as u_home %}{% url 'panel:overview' as p_overview %}{% url 'panel:approvals' as p_approvals %}{% url 'panel:users' as p_users %}{% url 'panel:prompts' as p_prompts %}{% url 'panel:links' as p_links %}{% url 'panel:database' as p_db %}{% url 'panel:settings' as p_settings %}{% url 'scans:dashboard' as u_dash %}{% url 'accounts:security' as u_sec %}
+<header class="top"><div class="top-in">
+  <a class="brand" href="{{ u_home }}" aria-label="{{ SITE_NAME }} home">{% include "partials/_logo.html" %}<span>{{ SITE_NAME }}</span>{% if user.is_superuser %} <span class="chip c-new" style="font-size:.7rem">admin</span>{% endif %}</a>
+  <button class="dgbtn is-sm navtoggle" type="button" data-bs-toggle="collapse" data-bs-target="#topMenu" aria-controls="topMenu" aria-expanded="false" aria-label="Toggle menu">Menu</button>
+  <div class="collapse d-lg-flex flex-lg-grow-1 align-items-lg-center gap-3 top-menu" id="topMenu">
+    <nav class="topnav" aria-label="Main">
+      <a href="{{ u_home }}" {% if request.path == u_home %}aria-current="page"{% endif %}><svg class="ic"><use href="#i-home"/></svg>Home</a>
+      {% if user.is_authenticated %}
+        {% if user.is_superuser %}
+        <a href="{{ p_overview }}" {% if request.path == p_overview %}aria-current="page"{% endif %}><svg class="ic"><use href="#i-grid"/></svg>Overview</a>
+        <a href="{{ p_approvals }}" {% if request.path == p_approvals %}aria-current="page"{% endif %}><svg class="ic"><use href="#i-user-check"/></svg>Approvals{% if pending_count %}<span class="nav-badge">{{ pending_count }}</span>{% endif %}</a>
+        <a href="{{ p_users }}" {% if p_users in request.path %}aria-current="page"{% endif %}><svg class="ic"><use href="#i-users"/></svg>Users</a>
+        <a href="{{ p_prompts }}" {% if request.path == p_prompts %}aria-current="page"{% endif %}><svg class="ic"><use href="#i-message"/></svg>Prompts</a>
+        <a href="{{ p_links }}" {% if request.path == p_links %}aria-current="page"{% endif %}><svg class="ic"><use href="#i-link"/></svg>Links</a>
+        <a href="{{ p_db }}" {% if request.path == p_db %}aria-current="page"{% endif %}><svg class="ic"><use href="#i-database"/></svg>Database</a>
+        <a href="{{ p_settings }}" {% if request.path == p_settings %}aria-current="page"{% endif %}><svg class="ic"><use href="#i-key"/></svg>AI key</a>
+        {% else %}
+        <a href="{{ u_dash }}" {% if '/dashboard' in request.path or '/scans' in request.path %}aria-current="page"{% endif %}><svg class="ic"><use href="#i-grid"/></svg>Dashboard</a>
+        {% endif %}
+      {% endif %}
+    </nav>
+    <div class="top-end">
+      {% if user.is_authenticated %}
+      <div class="dropdown">
+        <button class="usermenu" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu"><span class="avatar" aria-hidden="true">{{ user.username|slice:":2"|upper }}</span><span class="uname">{{ user.username }}</span><svg class="ic"><use href="#i-chevron"/></svg></button>
+        <ul class="dropdown-menu dropdown-menu-end dg-menu">
+          <li class="menu-head"><b>{{ user.username }}</b><span class="mute">{% if user.is_superuser %}Administrator{% else %}Developer{% endif %}</span></li>
+          <li><a class="dropdown-item" href="{{ u_sec }}"><svg class="ic"><use href="#i-lock"/></svg>Security and MFA</a></li>
+          <li><button class="dropdown-item" type="button" data-theme-toggle><svg class="ic"><use href="#i-sun"/></svg><span>Theme: auto</span></button></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="dropdown-item" type="submit"><svg class="ic"><use href="#i-logout"/></svg>Log out</button></form></li>
+        </ul>
+      </div>
+      {% else %}
+      <button type="button" class="dgbtn is-sm is-ghost" data-theme-toggle><svg class="ic"><use href="#i-sun"/></svg><span>Theme: auto</span></button>
+      <a class="dgbtn is-sm" href="{% url 'accounts:login' %}">Sign in</a>
+      <a class="dgbtn is-sm is-primary" href="{% url 'accounts:register' %}">Request access</a>
+      {% endif %}
+    </div>
+  </div>
+</div></header>

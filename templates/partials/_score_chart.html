@@ -1,0 +1,10 @@
+<svg class="chart" viewBox="0 0 {{ chart.w }} {{ chart.h }}" role="img" aria-label="Security score across {{ chart.points|length }} scan{{ chart.points|length|pluralize }}">
+  {% for g in chart.grid %}<line class="grid" x1="{{ g.x1 }}" x2="{{ g.x2 }}" y1="{{ g.y }}" y2="{{ g.y }}"/><text class="axis" x="{{ g.tx }}" y="{{ g.y }}" text-anchor="end" dominant-baseline="middle">{{ g.v }}</text>{% endfor %}
+  <path class="area" d="{{ chart.area }}"/>
+  {% if chart.points|length > 1 %}<polyline class="line" points="{{ chart.poly }}"/>{% endif %}
+  {% for p in chart.points %}
+  <circle class="dot{% if forloop.last %} last{% endif %}" cx="{{ p.x }}" cy="{{ p.y }}" r="5"><title>{{ p.label }}</title></circle>
+  <text class="val" x="{{ p.x }}" y="{{ p.y|add:'-11' }}">{{ p.score }}</text>
+  <text class="axis" x="{{ p.x }}" y="{{ chart.label_y }}" text-anchor="middle">#{{ p.number }}</text>
+  {% endfor %}
+</svg>

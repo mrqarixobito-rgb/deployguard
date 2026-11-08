@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Admin overview · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_overview.css' %}">{% endblock %}
+{% block content %}
+<div class="page-h"><div><h1>Admin overview</h1><p class="mute">Accounts, scans and AI usage across the platform.</p></div></div>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-lg"><div class="stat {% if stats.pending %}alert{% endif %}"><b class="num">{{ stats.pending }}</b><span>Waiting for approval</span></div></div>
+  <div class="col-6 col-md-4 col-lg"><div class="stat"><b class="num">{{ stats.approved }}</b><span>Approved users</span></div></div>
+  <div class="col-6 col-md-4 col-lg"><div class="stat"><b class="num">{{ stats.sites }}</b><span>Websites scanned</span></div></div>
+  <div class="col-6 col-md-4 col-lg"><div class="stat"><b class="num">{{ stats.scans }}</b><span>Total scans</span></div></div>
+  <div class="col-12 col-md-4 col-lg"><div class="stat"><b class="num">{{ stats.prompts }}</b><span>AI prompts</span></div></div>
+</div>
+<div class="panel mb-4 ai-status"><b>AI key:</b>
+  {% if ai_ready %}<span class="chip c-approved">connected</span><span class="mute">Users get Gemini explanations.</span>
+  {% else %}<span class="chip c-pending">not set</span><span class="mute">Users get sample explanations until you add a Gemini key.</span>{% endif %}
+  <a class="dgbtn is-sm ms-auto" href="{% url 'panel:settings' %}">AI settings</a></div>
+<div class="row g-3 mb-3">
+  <div class="col-12 col-lg-7"><div class="panel h-100"><div class="section-title"><svg class="ic"><use href="#i-layers"/></svg><h3>Scans in the last 14 days</h3><span class="mute ms-auto">{{ bars_total }} total</span></div>
+    <div class="bars" role="img" aria-label="Scans per day">{% for b in bars %}<div class="bar" title="{{ b.title }}: {{ b.count }} scan{{ b.count|pluralize }}"><i style="height:{{ b.pct }}%"></i><small>{{ b.label }}</small></div>{% endfor %}</div></div></div>
+  <div class="col-12 col-lg-5"><div class="panel h-100"><div class="section-title"><svg class="ic"><use href="#i-users"/></svg><h3>Accounts</h3></div>
+    <div class="hrow" style="gap:22px"><div class="donut" style="--a:{{ donut.a }};--b:{{ donut.b }}"><i class="num">{{ donut.total }}</i></div>
+      <div class="legend" style="flex-direction:column;gap:6px"><span style="color:var(--ok)"><b>{{ donut.approved }}</b> approved</span><span style="color:var(--med)"><b>{{ donut.pending }}</b> pending</span><span style="color:var(--crit)"><b>{{ donut.rejected }}</b> rejected</span><span style="color:var(--accent)"><b>{{ mfa_users }}</b> with MFA</span></div></div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-12 col-lg-6"><div class="panel flat h-100"><div class="panel-h"><h3>Needs your decision</h3><a class="dgbtn is-sm" href="{% url 'panel:approvals' %}">Open approvals</a></div>
+    {% for u in pending %}{% include "partials/_userline.html" %}{% empty %}<div class="empty">No pending requests.</div>{% endfor %}</div></div>
+  <div class="col-12 col-lg-6"><div class="panel flat h-100"><div class="panel-h"><h3>Latest AI prompts</h3><a class="dgbtn is-sm" href="{% url 'panel:prompts' %}">See all</a></div>
+    {% for p in prompts %}<div class="prompt-line"><b>{{ p.user.username }}</b> <span class="mute">asked about</span> {{ p.finding_title }}<div class="mute mono">{{ p.site }} · {{ p.created_at|timesince }} ago</div></div>{% empty %}<div class="empty">No prompts yet.</div>{% endfor %}</div></div>
+</div>
+{% endblock %}

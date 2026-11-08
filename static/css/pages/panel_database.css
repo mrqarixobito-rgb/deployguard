@@ -1,0 +1,5 @@
+/* Database viewer: table picker and a read-only grid. */
+.table-picker{display:flex;gap:8px;flex-wrap:wrap}
+.db-grid td{font-family:var(--font-mono);font-size:.78rem;padding:9px 16px;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.db-grid th{font-family:var(--font-mono)}
+.db-path{overflow-wrap:anywhere}

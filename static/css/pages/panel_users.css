@@ -1,0 +1,3 @@
+/* Users list: search box and a table whose rows open the user detail page. */
+.search-box{width:min(100%,320px)}
+.user-name{font-weight:700}

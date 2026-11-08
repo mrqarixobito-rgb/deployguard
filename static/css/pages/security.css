@@ -1,0 +1,19 @@
+/* Security page: MFA status, set-up steps with QR code, one-time recovery codes, and the disable / regenerate forms. */
+.sec-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:991.98px){.sec-grid{grid-template-columns:1fr}}
+.status-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.status-ico{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;flex:none}
+.status-ico.on{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.status-ico.off{background:color-mix(in srgb,var(--med) 16%,transparent);color:var(--med)}
+.status-ico .ic{width:26px;height:26px}
+.setup-steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:22px;counter-reset:st}
+.setup-steps>li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;counter-increment:st}
+.setup-steps>li::before{content:counter(st);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--accent);color:var(--accent);font-family:var(--font-display);font-weight:800}
+.qr{display:inline-block;background:#fff;padding:10px;border-radius:14px;line-height:0;border:1px solid var(--line)}
+.qr svg{width:200px;height:200px}
+.secret{font-family:var(--font-mono);letter-spacing:.08em;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;overflow-wrap:anywhere;user-select:all}
+.codes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:0;list-style:none}
+.codes li{font-family:var(--font-mono);font-size:1rem;letter-spacing:.08em;background:var(--bg);border:1px dashed var(--line);border-radius:var(--r-sm);padding:9px 12px;text-align:center;user-select:all}
+.manage details{border-top:1px solid var(--line);padding-top:14px}
+.manage summary{cursor:pointer;font-weight:600}
+.apps{display:flex;gap:8px;flex-wrap:wrap}

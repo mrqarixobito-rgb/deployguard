@@ -1,0 +1,7 @@
+/* One user: profile header, then their websites, scans and AI prompts. */
+.profile-head{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.site-card{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
+.site-card:last-child{border-bottom:0}
+.prompt-item{border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg2);padding:12px 14px}
+.prompt-item summary{cursor:pointer;font-weight:600}
+.prompt-item pre{white-space:pre-wrap;word-break:break-word;font-family:var(--font-mono);font-size:.8rem;margin:10px 0 0;background:var(--bg);padding:10px;border-radius:var(--r-sm);border:1px solid var(--line);color:var(--fg)}

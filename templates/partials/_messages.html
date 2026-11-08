@@ -1,0 +1,2 @@
+{% if messages %}<div aria-live="polite">{% for m in messages %}
+<div class="flash {{ m.tags }}" role="status"><span>{{ m }}</span><button type="button" data-dismiss-flash aria-label="Dismiss">Dismiss</button></div>{% endfor %}</div>{% endif %}

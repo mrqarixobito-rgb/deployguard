@@ -1,0 +1,39 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+<meta name="description" content="DeployGuard AI compares website security scans over time, explains findings with AI and verifies fixes.">
+<meta name="theme-color" content="#0a0f1e">
+<link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% block page_css %}{% endblock %}
+<script src="{% static 'js/theme.js' %}"></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% include "partials/_icons.html" %}
+<div class="bg-fx" aria-hidden="true"><i></i><i></i></div>
+<div id="app">
+{% block shell %}
+  {% include "partials/_topbar.html" %}
+  <main class="main enter">
+    {% include "partials/_messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+  {% include "partials/_footer.html" %}
+{% endblock %}
+</div>
+<div class="scan-overlay" id="scanOverlay" hidden role="status" aria-live="polite">
+  <div class="box"><h3>Scanning website</h3><p class="mute" data-step>Starting…</p><div class="dg-progress"><i style="width:8%"></i></div>
+  <p class="hint">Checks usually take 5 to 20 seconds. Keep this page open.</p></div>
+</div>
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/base.js' %}"></script>
+{% block page_js %}{% endblock %}
+</body>
+</html>

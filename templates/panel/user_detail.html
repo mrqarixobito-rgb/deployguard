@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}{{ person.username }} · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_user_detail.css' %}">{% endblock %}
+{% block content %}
+<a class="dgbtn is-sm is-ghost mb-3" href="{% url 'panel:users' %}">Back to users</a>
+<div class="panel profile-head mb-4">
+  <div style="min-width:0"><h2>{{ person.username }}</h2><p class="mute" style="overflow-wrap:anywhere">{{ person.email }} · {{ person.profile.organization|default:"no organization" }}</p><p class="mute mono">Joined {{ person.date_joined|date:"j M Y" }}</p></div>
+  <div class="hrow"><span class="chip c-{{ person.profile.status }}">{{ person.profile.status }}</span>
+    <form method="post" action="{% url 'panel:status' person.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+      {% if person.profile.status == "approved" %}<input type="hidden" name="status" value="rejected"><button class="dgbtn is-sm is-bad" type="submit">Revoke access</button>
+      {% else %}<input type="hidden" name="status" value="approved"><button class="dgbtn is-sm is-ok" type="submit">Approve</button>{% endif %}</form></div>
+</div>
+<div class="panel mb-4 hrow" style="justify-content:space-between"><div><b>Multi-factor authentication:</b>
+  {% if person.profile.mfa_enabled %}<span class="chip c-approved">enabled</span> <span class="mute">{{ person.profile.recovery_hashes|length }} recovery codes left</span>{% else %}<span class="chip c-pending">not enabled</span>{% endif %}</div>
+  {% if person.profile.mfa_enabled %}<form method="post" action="{% url 'panel:reset_mfa' person.pk %}">{% csrf_token %}<button class="dgbtn is-sm is-bad" type="submit">Reset MFA</button></form>{% endif %}</div>
+<div class="panel flat mb-4"><div class="panel-h"><h3>Websites ({{ sites|length }})</h3></div>
+  {% for s in sites %}<div class="site-card"><div style="min-width:0"><a class="mono" href="{{ s.site.url }}" target="_blank" rel="noopener noreferrer" style="overflow-wrap:anywhere">{{ s.site.url }}</a><div class="mute">{{ s.count }} scan{{ s.count|pluralize }} · last {{ s.latest.created_at|timesince }} ago</div></div>
+    <div class="hrow">Score <b class="num c-{{ s.latest.score_class }}">{{ s.latest.score }}</b>{% include "partials/_spark.html" with spark=s.spark %}</div></div>
+  {% empty %}<div class="empty">This user has not scanned any website.</div>{% endfor %}</div>
+<div class="panel flat mb-4"><div class="panel-h"><h3>Recent scans</h3></div><div class="tbl-wrap"><table class="dgtable"><thead><tr><th>Website</th><th>Scan</th><th>Score</th><th>When</th></tr></thead><tbody>
+  {% for s in scans %}<tr><td class="mono">{{ s.website.host }}</td><td class="num">#{{ s.number }}</td><td class="num c-{{ s.score_class }}"><b>{{ s.score }}</b></td><td class="mute">{{ s.created_at|date:"j M Y, H:i" }}</td></tr>
+  {% empty %}<tr><td colspan="4" class="empty">No scans yet.</td></tr>{% endfor %}</tbody></table></div></div>
+<h3 class="mb-3">AI prompts ({{ prompts|length }})</h3>
+<div class="stack">{% for p in prompts %}{% include "partials/_prompt.html" %}{% empty %}<div class="panel empty">No AI prompts from this user.</div>{% endfor %}</div>
+{% endblock %}

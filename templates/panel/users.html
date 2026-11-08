@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Users · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_users.css' %}">{% endblock %}
+{% block content %}
+<div class="page-h"><div><h1>Users</h1><p class="mute">Select a user to see their websites, scans and AI prompts.</p></div>
+  <form class="search-box" method="get"><label class="form-label mute" for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Name, email or organization"></form></div>
+<div class="panel flat"><div class="tbl-wrap"><table class="dgtable"><thead><tr><th>User</th><th>Organization</th><th>Status</th><th>Websites</th><th>Scans</th><th>Prompts</th><th>Joined</th></tr></thead><tbody>
+{% for u, scan_count in rows %}<tr class="click"><td><a class="rowlink user-name" href="{% url 'panel:user' u.pk %}">{{ u.username }}</a><div class="mute mono">{{ u.email }}</div></td><td>{{ u.profile.organization|default:"-" }}</td>
+  <td><span class="chip c-{{ u.profile.status }}">{{ u.profile.status }}</span></td><td class="num">{{ u.n_sites }}</td><td class="num">{{ scan_count }}</td><td class="num">{{ u.n_prompts }}</td><td class="mute">{{ u.date_joined|date:"j M Y" }}</td></tr>
+{% empty %}<tr><td colspan="7" class="empty">No users match "{{ q }}".</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

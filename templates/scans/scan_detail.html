@@ -1,0 +1,81 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}{{ host }} scan {{ scan.number }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/scan_detail.css' %}">{% endblock %}
+{% block content %}
+<div id="csrfHolder">{% csrf_token %}</div>
+<div class="page-h">
+  <div>
+    <a class="dgbtn is-sm is-ghost mb-3" href="{% url 'scans:dashboard' %}">Back to dashboard</a>
+    <h1>{{ host }}</h1>
+    <p class="mute mono"><a href="{{ scan.website.url }}" target="_blank" rel="noopener noreferrer">{{ scan.website.url }}</a> · scan {{ scan.number }} of {{ history|length }} · {{ scan.created_at|date:"j M Y, H:i" }}{% if scan.mode == "demo" %} · demo data{% endif %}</p>
+  </div>
+  <div class="hrow">
+    <a class="dgbtn" href="{% url 'scans:report' scan.pk %}?platform={{ platform }}">Download PDF report</a>
+    {% if is_latest %}<form method="post" action="{% url 'scans:rescan' scan.pk %}" data-scan-form>{% csrf_token %}<button class="dgbtn is-primary" type="submit">Re-scan and verify</button></form>{% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-12 col-lg-5"><div class="panel h-100 hrow" style="gap:22px;align-items:center">
+    <div class="score {{ scan.score_class }}" style="--p:{{ scan.score }}"><i class="num">{{ scan.score }}</i></div>
+    <div class="grow">
+      {% if prev %}<h3>Compared with scan {{ prev.number }}</h3>
+      <p class="mute">{{ counts.resolved }} resolved, {{ counts.new }} new, {{ counts.recurring }} recurring and {{ counts.unchanged }} unchanged. {{ counts.passed }} check{{ counts.passed|pluralize }} passed.</p>
+      {% else %}<h3>First scan: baseline recorded</h3>
+      <p class="mute">Every failing check is marked new. Fix them, deploy, then press "Re-scan and verify" to see what changed.</p>{% endif %}
+    </div></div></div>
+  <div class="col-12 col-lg-7"><div class="panel h-100"><div class="section-title"><svg class="ic"><use href="#i-layers"/></svg><h3>Score history</h3></div>
+    {% include "partials/_score_chart.html" with chart=chart %}</div></div>
+</div>
+
+<div class="diff mb-3">
+  <a href="?filter=all&platform={{ platform }}" {% if filter == "all" %}aria-current="true"{% endif %}><b class="num c-unchanged">{{ all_count }}</b><span>All</span></a>
+  <a href="?filter=new&platform={{ platform }}" {% if filter == "new" %}aria-current="true"{% endif %}><b class="num c-new">{{ counts.new }}</b><span>New</span></a>
+  <a href="?filter=recurring&platform={{ platform }}" {% if filter == "recurring" %}aria-current="true"{% endif %}><b class="num c-recurring">{{ counts.recurring }}</b><span>Recurring</span></a>
+  <a href="?filter=unchanged&platform={{ platform }}" {% if filter == "unchanged" %}aria-current="true"{% endif %}><b class="num c-unchanged">{{ counts.unchanged }}</b><span>Unchanged</span></a>
+  <a href="?filter=resolved&platform={{ platform }}" {% if filter == "resolved" %}aria-current="true"{% endif %}><b class="num c-resolved">{{ counts.resolved }}</b><span>Resolved</span></a>
+</div>
+
+<div class="panel flat">
+{% for f in findings %}
+  <details class="finding" id="f{{ f.pk }}" {% if f.pk == open_id %}open{% endif %}>
+    <summary class="f-head"><span class="sev s-{{ f.severity }}"></span><b>{{ f.title }}</b><span class="hrow" style="gap:6px"><span class="chip c-{{ f.status }}">{{ f.status }}</span><span class="chip c-{{ f.severity }}">{{ f.severity }}</span></span></summary>
+    <div class="f-body">
+      <div><div class="mute" style="font-size:.82rem;margin-bottom:6px">Scanner evidence</div><pre class="evidence">{{ f.evidence }}</pre></div>
+      {% if f.failed %}
+      <div class="fixbox">
+        <div class="hrow" style="justify-content:space-between"><b>How to fix this</b>
+          <div class="pills" role="group" aria-label="Server type">{% for key, label in platforms %}<a href="?filter={{ filter }}&platform={{ key }}&open={{ f.pk }}#f{{ f.pk }}" {% if key == platform %}aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}</div></div>
+        <ol>{% for step in f.fix.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+        <div class="codewrap"><pre class="evidence">{{ f.code }}</pre><button type="button" class="dgbtn is-sm" data-copy>Copy</button></div>
+        <div class="mute" style="font-size:.82rem">Check from your terminal after you deploy:</div>
+        <div class="codewrap"><pre class="evidence">{{ f.fix.verify }}</pre><button type="button" class="dgbtn is-sm" data-copy>Copy</button></div>
+      </div>
+      <div class="ai-slot" data-url="{% url 'scans:explain' f.pk %}">
+        {% if f.ai %}<div class="ai-box"><div class="ai-tag">{% if f.ai.source == "gemini" %}Gemini explanation{% else %}Sample explanation (no AI key is connected){% endif %}</div>{{ f.ai.response }}</div>
+        {% else %}<button type="button" class="dgbtn" data-explain>Explain with AI</button>{% endif %}
+      </div>
+      {% else %}<p>This finding was open in the previous scan and passes now.</p>{% endif %}
+    </div>
+  </details>
+{% empty %}<div class="empty">No findings in this group.</div>{% endfor %}
+</div>
+
+{% if history|length < 2 %}
+<div class="panel mt-3"><h3>Old vs new results</h3><p class="mute">After you deploy a fix, press "Re-scan and verify". Each scan is stored and compared here.</p></div>
+{% else %}
+<div class="panel flat mt-3">
+  <div class="panel-h"><div><h3>Old vs new results</h3><p class="mute" style="font-size:.85rem">Every scan of this website. Select a column to open that scan.</p></div></div>
+  <div class="tbl-wrap"><table class="dgtable matrix"><thead><tr><th>Check</th>
+    {% for h in history %}<th class="cell"><a class="dgbtn is-sm {% if h.pk == scan.pk %}is-primary{% else %}is-ghost{% endif %}" href="{% url 'scans:detail' h.pk %}">#{{ h.number }} <span class="mono" style="font-weight:400">{{ h.created_at|date:"j M" }}</span></a></th>{% endfor %}
+    <th>In this scan</th></tr></thead><tbody>
+  {% for row in matrix %}<tr><td>{{ row.check.title }}</td>
+    {% for s, bad in row.cells %}<td class="cell"><b class="{% if bad %}c-critical{% else %}c-resolved{% endif %}" title="{% if bad %}Failed{% else %}Passed{% endif %}" aria-label="{% if bad %}Failed{% else %}Passed{% endif %}">{% if bad %}&#10005;{% else %}&#10003;{% endif %}</b></td>{% endfor %}
+    <td><span class="chip c-{{ row.now }}">{{ row.now }}</span></td></tr>{% endfor %}
+  <tr><td><b>Score</b></td>{% for h in history %}<td class="cell num"><b class="c-{{ h.score_class }}">{{ h.score }}</b></td>{% endfor %}<td></td></tr>
+  </tbody></table></div>
+</div>
+{% endif %}
+{% if passed_titles %}<p class="hint mt-3">{{ passed_titles|length }} of {{ checks_total }} checks passed with no issue.</p>{% endif %}
+{% endblock %}
+{% block page_js %}<script src="{% static 'js/scan_detail.js' %}"></script>{% endblock %}

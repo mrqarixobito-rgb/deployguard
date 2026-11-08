@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Enter your code · {{ SITE_NAME }}{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/mfa_verify.css' %}">{% endblock %}
+{% block shell %}
+<div class="mfa-wrap">
+  <section class="mfa-card" aria-labelledby="t">
+    <a class="brand" href="{% url 'home' %}" aria-label="Back to home">{% include "partials/_logo.html" %}<span>{{ SITE_NAME }}</span></a>
+    <div class="mfa-badge"><svg class="ic"><use href="#i-lock"/></svg></div>
+    <div class="stack" style="gap:8px"><h1 id="t" style="font-size:1.8rem">Enter your code</h1>
+      <p class="mute">Signing in as <b class="mono">{{ username }}</b>. Open your authenticator app and type the 6-digit code.</p></div>
+    {% include "partials/_messages.html" %}
+    <form method="post" class="stack" novalidate>
+      {% csrf_token %}
+      <div><label class="form-label" for="code">Authenticator code or recovery code</label>
+        <input class="form-control code-input" id="code" name="code" inputmode="text" autocomplete="one-time-code" autofocus required maxlength="12" placeholder="000000"></div>
+      {% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}
+      <button class="dgbtn is-primary" type="submit">Verify and sign in</button>
+    </form>
+    <div class="mfa-links"><span class="mute">Lost your phone? Type a recovery code instead.</span><a href="{% url 'accounts:login' %}">Use a different account</a></div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+/* Dashboard: stat tiles, the "scan a website" form and the table of tracked sites. */
+.scan-form .url-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.scan-form .url-row .grow{min-width:min(100%,260px)}
+.scan-form .consent{display:flex;gap:10px;align-items:flex-start;margin-top:14px;color:var(--mute);font-size:.88rem}
+.scan-form .consent input{margin-top:3px;flex:none}
+.site-host{font-weight:700}
+.change-chips{display:flex;gap:6px;flex-wrap:wrap}
+.score-cell{font-weight:800}
